@@ -80,4 +80,4 @@ class Notifier:
             logger.info("Email sent successfully.")
         except Exception as e:
             logger.error(f"Failed to send email: {e}")
-
+            raise e

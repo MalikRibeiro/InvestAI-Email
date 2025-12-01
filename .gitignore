@@ -16,11 +16,10 @@ env/
 
 # --- Arquivos do Projeto (Específicos) ---
 # Ignora os vídeos gravados (são pesados e contêm dados sensíveis)
-data/*.mp4
-data/*.avi
 data/
 !data/portfolio.json
 !data/history.json
+!data/rdb_state.json
 
 # Ignora todos os arquivos na pasta reports
 reports/

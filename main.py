@@ -71,6 +71,7 @@ def job():
         
     except Exception as e:
         logger.error(f"Job failed: {e}", exc_info=True)
+        sys.exit(1)
 
 def main():
     parser = argparse.ArgumentParser(description="Financial Automation Bot")
