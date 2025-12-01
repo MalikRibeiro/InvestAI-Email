@@ -23,7 +23,11 @@ class Notifier:
 
         msg = MIMEMultipart()
         msg['From'] = Settings.EMAIL_SENDER
-        msg['To'] = Settings.EMAIL_RECEIVER
+
+        raw_receivers = Settings.EMAIL_RECEIVER
+        recipients_list = [email.strip() for email in raw_receivers.split(',')]
+        msg['To'] = ", ".join(recipients_list)
+
         msg['Subject'] = subject
 
         try:
@@ -77,7 +81,7 @@ class Notifier:
             server.login(Settings.EMAIL_SENDER, Settings.EMAIL_PASSWORD)
             server.send_message(msg)
             server.quit()
-            logger.info("Email sent successfully.")
+            logger.info(f"Email sent successfully to: {recipients_list}")
         except Exception as e:
             logger.error(f"Failed to send email: {e}")
             raise e
