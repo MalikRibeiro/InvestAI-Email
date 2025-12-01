@@ -72,6 +72,45 @@ class PortfolioManager:
         else:
             return state["rdb_value"]
 
+    def _load_history(self):
+        """Loads history data from JSON file."""
+        history_file = "data/history.json"
+        try:
+            if os.path.exists(history_file):
+                with open(history_file, 'r') as f:
+                    return json.load(f)
+            return []
+        except Exception as e:
+            logger.error(f"Failed to load history.json: {e}")
+            return []
+
+    def _save_history(self, total_value):
+        """Saves daily total value to history."""
+        history_file = "data/history.json"
+        today = datetime.now().strftime("%Y-%m-%d")
+        
+        history = self._load_history()
+        
+        # Check if today is already in history, update if so
+        updated = False
+        for entry in history:
+            if entry['date'] == today:
+                entry['value'] = total_value
+                updated = True
+                break
+        
+        if not updated:
+            history.append({
+                "date": today,
+                "value": total_value
+            })
+            
+        try:
+            with open(history_file, 'w') as f:
+                json.dump(history, f, indent=2)
+        except Exception as e:
+            logger.error(f"Failed to save history.json: {e}")
+
     def calculate_portfolio(self):
         portfolio_items = self._load_portfolio_data()
         portfolio = []
@@ -152,13 +191,34 @@ class PortfolioManager:
         })
         total_value += rdb_val
         
+        # 3. History & Variation
+        history = self._load_history()
+        daily_variation_pct = 0.0
+        
+        if history:
+            # Sort by date just in case
+            history.sort(key=lambda x: x['date'])
+            # Get last entry that is NOT today
+            today = datetime.now().strftime("%Y-%m-%d")
+            last_entry = None
+            for entry in reversed(history):
+                if entry['date'] != today:
+                    last_entry = entry
+                    break
+            
+            if last_entry and last_entry['value'] > 0:
+                daily_variation_pct = ((total_value - last_entry['value']) / last_entry['value']) * 100
+
+        # Save today's value
+        self._save_history(total_value)
+
         df = pd.DataFrame(portfolio)
         if not df.empty:
             df['allocation'] = (df['value_brl'] / total_value) * 100
         else:
             df['allocation'] = 0
         
-        return df, total_value
+        return df, total_value, daily_variation_pct
 
     def get_rebalancing_suggestions(self, df, total_value):
         # Map internal categories to Target Allocation keys

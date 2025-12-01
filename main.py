@@ -34,7 +34,7 @@ def job():
         
         # 2. Portfolio Logic
         manager = PortfolioManager(market_data, indicators)
-        portfolio_df, total_value = manager.calculate_portfolio()
+        portfolio_df, total_value, daily_variation_pct = manager.calculate_portfolio()
         suggestions_df = manager.get_rebalancing_suggestions(portfolio_df, total_value)
         contribution_df = manager.suggest_contribution(250.00, suggestions_df)
         
@@ -43,17 +43,9 @@ def job():
         analyst = AIAnalyst()
         ai_analysis = analyst.generate_ai_analysis(portfolio_df, total_value, indicators)
         
-        # 4. Report Generation
+        # 4. Report Generation (Chart only)
         generator = ReportGenerator()
-        markdown_report = generator.generate_markdown_report(
-            portfolio_df, total_value, suggestions_df, contribution_df, indicators, ai_analysis
-        )
-        
-        os.makedirs("data", exist_ok=True)
-        pdf_filename = f"data/report_{datetime.now().strftime('%Y%m%d')}.pdf"
-        generator.generate_pdf_report(
-            portfolio_df, total_value, suggestions_df, contribution_df, indicators, ai_analysis, filename=pdf_filename
-        )
+        chart_b64 = generator.generate_allocation_chart(portfolio_df)
         
         # 5. Notification
         notifier = Notifier()
@@ -63,14 +55,16 @@ def job():
         email_context = {
             'date': datetime.now().strftime('%d/%m/%Y'),
             'total_value': total_value,
+            'daily_variation_pct': daily_variation_pct,
             'indicators': indicators,
             'ai_analysis': ai_analysis,
             'suggestions': suggestions_df,
-            'contribution': contribution_df
+            'contribution': contribution_df,
+            'chart_b64': chart_b64
         }
         
         # Send Email
-        notifier.send_email(subject, email_context, attachment_path=pdf_filename)
+        notifier.send_email(subject, email_context)
         
         
         logger.info("Job completed successfully.")

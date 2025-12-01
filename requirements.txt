@@ -6,7 +6,6 @@ requests
 beautifulsoup4
 python-dotenv
 schedule
-reportlab
 openpyxl
 
 google-generativeai

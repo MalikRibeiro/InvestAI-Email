@@ -1,26 +1,124 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; line-height: 1.6; background-color: #f4f4f4; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 2px solid #004080; padding-bottom: 20px; margin-bottom: 20px; }
-        .header h1 { color: #004080; margin: 0; font-size: 24px; }
-        .summary-box { background-color: #e6f2ff; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 5px solid #004080; }
-        .summary-item { font-size: 16px; margin-bottom: 5px; }
-        .total-value { font-size: 20px; font-weight: bold; color: #006600; }
-        .section-title { color: #004080; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-top: 25px; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
-        .ai-analysis { background-color: #fff9e6; padding: 15px; border-radius: 5px; border-left: 5px solid #ffcc00; font-style: italic; }
-        .table-container { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 14px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #004080; color: #fff; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .footer { text-align: center; font-size: 12px; color: #777; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 10px; }
-        .status-ok { color: green; font-weight: bold; }
-        .status-alert { color: red; font-weight: bold; }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #004080;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #004080;
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .summary-box {
+            background-color: #e6f2ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 5px solid #004080;
+        }
+
+        .summary-item {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .total-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #006600;
+        }
+
+        .section-title {
+            color: #004080;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .ai-analysis {
+            background-color: #fff9e6;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 5px solid #ffcc00;
+            font-style: italic;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #004080;
+            color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .status-ok {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-alert {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -29,10 +127,27 @@
         </div>
 
         <div class="summary-box">
-            <div class="summary-item total-value">💰 Valor Total: R$ {{ total_value }}</div>
+            <div class="summary-item total-value">
+                💰 Valor Total: R$ {{ total_value }}
+                {% if daily_variation_pct > 0 %}
+                <span style="color: green; font-size: 16px;">(🟢 +{{ "%.2f"|format(daily_variation_pct) }}%)</span>
+                {% elif daily_variation_pct < 0 %} <span style="color: red; font-size: 16px;">(🔴 {{
+                    "%.2f"|format(daily_variation_pct) }}%)</span>
+                    {% else %}
+                    <span style="color: gray; font-size: 16px;">(⚪ 0.00%)</span>
+                    {% endif %}
+            </div>
             <div class="summary-item">📈 Selic: {{ indicators.selic_meta }}% | CDI: {{ indicators.cdi }}%</div>
             <div class="summary-item">💵 PTAX: R$ {{ indicators.ptax_venda }}</div>
         </div>
+
+        {% if chart_b64 %}
+        <div class="section-title">📊 Alocação Visual</div>
+        <div style="text-align: center;">
+            <img src="data:image/png;base64,{{ chart_b64 }}" alt="Alocação de Ativos"
+                style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        </div>
+        {% endif %}
 
         <div class="section-title">🧠 Análise de IA</div>
         <div class="ai-analysis">
@@ -58,9 +173,9 @@
                         <td>{{ row.target_pct }}%</td>
                         <td>
                             {% if row.status == 'OK' %}
-                                <span class="status-ok">✅ OK</span>
+                            <span class="status-ok">✅ OK</span>
                             {% else %}
-                                <span class="status-alert">⚠️ {{ row.status }}</span>
+                            <span class="status-alert">⚠️ {{ row.status }}</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -72,7 +187,7 @@
         <div class="section-title">💰 Sugestão de Aporte (R$ 250,00)</div>
         <div class="table-container">
             {% if contribution_is_str %}
-                <p>{{ contribution }}</p>
+            <p>{{ contribution }}</p>
             {% else %}
             <table>
                 <thead>
@@ -98,4 +213,5 @@
         </div>
     </div>
 </body>
+
 </html>

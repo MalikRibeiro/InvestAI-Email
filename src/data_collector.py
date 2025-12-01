@@ -113,17 +113,9 @@ class DataCollector:
             indicators['selic_meta'] = 0.0
 
         try:
-            # CDI (12) - Taxa DI % a.a. (4389 is accumulated, 12 is daily rate annualized usually)
-            # Using 4389 (CDI acumulado no mês) or 12 (CDI % a.d.)?
-            # Usually users want the annualized rate. Series 432 is Selic Meta % a.a.
-            # Series 1178 is Selic Over % a.a.
-            # Series 4389 is CDI accumulated in the month.
-            # Let's use 12 (CDI % a.d.) and convert or find the annualized one.
-            # Actually, Series 432 is the target.
-            # Let's use Selic as proxy for CDI if we can't find the exact annualized CDI series easily, 
+            # CDI (12) - Taxa DI % a.a.
+            # Using Selic as proxy for CDI if we can't find the exact annualized CDI series easily, 
             # but usually CDI follows Selic Over.
-            # Let's try to fetch CDI annualized directly if possible, or just use Selic - 0.10.
-            # For now, let's stick to Selic Meta as the main indicator.
             indicators['cdi'] = indicators['selic_meta'] - 0.10
         except Exception:
             indicators['cdi'] = 0.0
@@ -131,13 +123,19 @@ class DataCollector:
         try:
             # PTAX (USD)
             # python-bcb has a currency module
-            ptax = currency.get('USD', start_date=datetime.now().strftime('%Y-%m-%d'), end_date=datetime.now().strftime('%Y-%m-%d'))
+            # Fix: use 'start' and 'end' instead of 'start_date' and 'end_date'
+            today_str = datetime.now().strftime('%Y-%m-%d')
+            ptax = currency.get('USD', start=today_str, end=today_str)
+            
             if not ptax.empty:
                 indicators['ptax_venda'] = ptax['USD'].iloc[-1]
             else:
                 # Try yesterday if today is empty (weekend/holiday)
                 last_ptax = currency.get('USD', last=1)
-                indicators['ptax_venda'] = last_ptax['USD'].iloc[-1]
+                if not last_ptax.empty:
+                    indicators['ptax_venda'] = last_ptax['USD'].iloc[-1]
+                else:
+                    indicators['ptax_venda'] = 0.0
         except Exception as e:
             logger.error(f"Error fetching PTAX via BCB: {e}")
             indicators['ptax_venda'] = 0.0

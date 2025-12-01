@@ -16,7 +16,7 @@ class Notifier:
         os.makedirs(self.template_dir, exist_ok=True)
         self.env = Environment(loader=FileSystemLoader(self.template_dir))
 
-    def send_email(self, subject, context, attachment_path=None):
+    def send_email(self, subject, context):
         if not Settings.EMAIL_SENDER or not Settings.EMAIL_PASSWORD:
             logger.warning("Email credentials not set. Skipping email.")
             return
@@ -69,12 +69,6 @@ class Notifier:
             logger.error(f"Error rendering email template: {e}")
             # Fallback to simple text if template fails
             msg.attach(MIMEText("Erro ao gerar relatório HTML. Verifique os logs.", 'plain'))
-
-        if attachment_path and os.path.exists(attachment_path):
-            with open(attachment_path, "rb") as f:
-                part = MIMEApplication(f.read(), Name=os.path.basename(attachment_path))
-            part['Content-Disposition'] = f'attachment; filename="{os.path.basename(attachment_path)}"'
-            msg.attach(part)
 
         try:
             # Gmail SMTP
