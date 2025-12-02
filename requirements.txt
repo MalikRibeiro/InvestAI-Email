@@ -8,3 +8,4 @@ GoogleNews
 requests
 matplotlib
 markdown
+jinja2
