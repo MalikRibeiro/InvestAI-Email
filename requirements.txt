@@ -6,3 +6,4 @@ google-generativeai
 python-bcb
 GoogleNews
 requests
+matplotlib
