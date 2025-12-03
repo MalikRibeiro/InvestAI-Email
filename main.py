@@ -1,7 +1,4 @@
-import schedule
-import time
 import logging
-import argparse
 import sys
 import os
 from datetime import datetime
@@ -12,6 +9,7 @@ from src.report_generator import ReportGenerator
 from src.notifier import Notifier
 from src.ai_analyst import AIAnalyst
 from src.news_collector import NewsCollector
+from src.sheets_manager import SheetsManager
 
 # Configure Logging
 os.makedirs("logs", exist_ok=True)
@@ -25,8 +23,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from src.sheets_manager import SheetsManager
-
 def job():
     logger.info("Starting daily financial report job...")
     try:
@@ -36,7 +32,7 @@ def job():
             logger.error("Failed to load portfolio data. Aborting.")
             return
 
-        # 2. Data Collection (Pass portfolio data)
+        # 2. Data Collection
         collector = DataCollector(portfolio_data)
         market_data = collector.get_market_data()
         indicators = collector.get_economic_indicators()
@@ -45,7 +41,7 @@ def job():
         news_collector = NewsCollector()
         news_summary = news_collector.get_top_news()
         
-        # 3. Portfolio Logic (Pass portfolio data & market data)
+        # 3. Portfolio Logic
         manager = PortfolioManager(portfolio_data, market_data, indicators)
         portfolio_df, total_value, daily_variation_pct = manager.calculate_portfolio()
         suggestions_df = manager.get_rebalancing_suggestions(portfolio_df, total_value)
@@ -79,33 +75,11 @@ def job():
         # Send Email
         notifier.send_email(subject, email_context)
         
-        
         logger.info("Job completed successfully.")
         
     except Exception as e:
         logger.error(f"Job failed: {e}", exc_info=True)
         sys.exit(1)
 
-def main():
-    parser = argparse.ArgumentParser(description="Financial Automation Bot")
-    parser.add_argument("--test", action="store_true", help="Run the job immediately once and exit")
-    args = parser.parse_args()
-    
-    if args.test:
-        logger.info("Running in TEST mode.")
-        job()
-    else:
-        logger.info("Scheduler started. Waiting for 19:00...")
-        # Schedule for 19:00 weekdays
-        schedule.every().monday.at("19:00").do(job)
-        schedule.every().tuesday.at("19:00").do(job)
-        schedule.every().wednesday.at("19:00").do(job)
-        schedule.every().thursday.at("19:00").do(job)
-        schedule.every().friday.at("19:00").do(job)
-        
-        while True:
-            schedule.run_pending()
-            time.sleep(60)
-
 if __name__ == "__main__":
-    main()
+    job()
