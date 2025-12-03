@@ -2,15 +2,19 @@ name: Relatório Diário Invest-AI
 
 on:
   schedule:
-    # 22:00 UTC equivale a 19:00 no Brasil (Horário Padrão)
-    - cron: '0 22 * * 1-5'
-  workflow_dispatch: # Botão para rodar manualmente
+    # Agendamento CRON (Horário UTC)
+    # 16:00 UTC = 13:00 Horário de Brasília (UTC-3)
+    # Roda de Segunda (1) a Sexta (5)
+    - cron: '0 16 * * 1-5'
+  
+  # Permite rodar manualmente clicando no botão "Run workflow" na aba Actions
+  workflow_dispatch:
 
 jobs:
   run-invest-ai:
     runs-on: ubuntu-latest
     
-    # Permissões necessárias para salvar o histórico.json
+    # Permissões necessárias para o robô salvar o arquivo history.json
     permissions:
       contents: write
 
@@ -26,26 +30,28 @@ jobs:
       - name: Instalar dependências
         run: |
           pip install -r requirements.txt
-          # Instala dependências extras que podem faltar no ambiente limpo
-          pip install requests requests-cache lxml
+          # Garante a instalação de dependências críticas que às vezes faltam no ambiente limpo
+          pip install requests requests-cache lxml matplotlib
 
       - name: Executar Robô
         env:
+          # Mapeia os segredos configurados no repositório para o script
           EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
           EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # A URL da planilha está no settings.py, mas se quiser pode por aqui também
           LOG_LEVEL: INFO
-        run: python main.py --test
+        # Executa o script diretamente. Como removemos o loop interno, ele roda uma vez e finaliza.
+        run: python main.py
 
       - name: Salvar Histórico (Commit & Push)
         run: |
+          # Configura um usuário genérico para o Git registrar a mudança
           git config --global user.name 'Invest-AI Bot'
           git config --global user.email 'bot@invest-ai.com'
           
-          # Adiciona arquivos de dados modificados
+          # Adiciona o arquivo de histórico que foi modificado pelo script
           git add data/history.json
           
-          # Commit e Push apenas se houver mudanças
+          # Verifica se houve mudança antes de tentar commitar (evita erro se rodar em feriado/sem dados novos)
           git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 Update: Histórico Financeiro" && git push)
