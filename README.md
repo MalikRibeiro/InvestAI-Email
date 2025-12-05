@@ -2,8 +2,7 @@
 
 ### Seu Gestor de Portfólio Inteligente na Nuvem
 
-![GitHub Workflow
-Status](https://img.shields.io/github/actions/workflow/status/SEU_USUARIO/Invest-AI/daily_report.yml)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/MalikRibeiro/Invest-AI-Email/daily_report.yml)
 ![Python Version](https://img.shields.io/badge/python-3.12%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
