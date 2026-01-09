@@ -2,7 +2,7 @@ yfinance
 pandas
 python-dotenv
 schedule
-google-generativeai
+google-genai
 python-bcb
 GoogleNews
 requests
