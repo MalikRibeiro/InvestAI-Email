@@ -16,7 +16,7 @@ class DataCollector:
         
         # Check if we need USD conversion
         has_international = any(
-            item.get('category') in ['US_STOCKS', 'US_REITS'] or 
+            item.get('category') in ['US_STOCKS', 'US_REITS', 'ETF_USA'] or
             (item.get('category') == 'CRYPTO' and not item['ticker'].endswith('-BRL'))
             for item in self.portfolio_data
         )

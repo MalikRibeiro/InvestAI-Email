@@ -96,7 +96,7 @@ class PortfolioManager:
                     avg_price_brl = 0
 
             # 3. US Stocks/REITs -> Convert to BRL
-            elif category in ["US_REITS", "US_STOCKS"]:
+            elif category in ["US_REITS", "US_STOCKS", "ETF_USA"]:
                 usd_rate = self.market_data.get('BRL=X', {}).get('price', 0)
                 if usd_rate <= 0: 
                     usd_rate = 6.00
@@ -182,7 +182,8 @@ class PortfolioManager:
             "US_REITS": "REITs",
             "US_STOCKS": "Ações EUA",
             "CRYPTO": "Cripto",
-            "RENDA_FIXA": "Renda Fixa"
+            "RENDA_FIXA": "Renda Fixa",
+            "ETF_USA": "ETFs EUA"
         }
         
         # Group by category

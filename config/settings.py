@@ -33,11 +33,12 @@ class Settings:
     
     # Alocação Ideal Atualizada
     TARGET_ALLOCATION = {
-        "Renda Fixa": 0.35,  # 35%
-        "Ações BR": 0.20,    # 20%
-        "ETFs": 0.15,        # 15%
-        "FIIs": 0.10,        # 10%
-        "REITs": 0.07,       # 7%
-        "Ações EUA": 0.07,   # 7%
-        "Cripto": 0.06       # 6%
+        "Renda Fixa": 0.35,  
+        "Ações BR": 0.20,    
+        "ETFs": 0.15,        
+        "FIIs": 0.10,        
+        "REITs": 0.07,       
+        "Ações EUA": 0.07,   
+        "Cripto": 0.06,
+        "ETFs EUA": 0.03
     }
